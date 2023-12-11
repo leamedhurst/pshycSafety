@@ -5,16 +5,28 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
 import Image from 'next/image';
-import { getSession } from '@auth0/nextjs-auth0';
+import { AccessTokenRequest, getSession, Session } from '@auth0/nextjs-auth0';
+import { NextRequest, NextResponse } from 'next/server';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import jwt from 'jsonwebtoken';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import { IncomingMessage, ServerResponse } from 'http';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-var adminUser = false;
+ var user = "";
 
-export default async function Page() {
-  adminUser = false;
-  const session = await getSession();
-  if (session) {
-     adminUser = session?.user['https://the5cs.com/roles'].includes('Admin');
-  }  
+export default function Page({example}: {example: any}) {
+ console.log("running page  ");
+  if (example) {  
+    console.log("example " + example);
+  } else {
+    console.log("no example");
+  }
+   // const { accessToken } = await getAccessToken();
+  user = "";
+  
+ 
+  
  
  
   return (
@@ -30,17 +42,14 @@ export default async function Page() {
           <p className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}>
             <strong>Welcome tos Pshyc Safety.</strong> The new innovative way to measure, report and take action on Psycological Safety at your organisation.
           </p>
-          
            {/* ... */}
-        {adminUser ? (
-          <>
+        {user ? (
             <Link
             href="/admin"
             className="flex items-center gap-5 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
           >
             <span>Admin</span> <ArrowRightIcon className="w-5 md:w-6" />
-          </Link>          
-           </>
+          </Link>
         ) : (
           <>
           <Link
@@ -80,3 +89,22 @@ export default async function Page() {
   );
 }
 
+export async function getServerSideProps(context: { req: IncomingMessage; res: ServerResponse; }) {
+  const session = await getSession(context.req, context.res);
+
+  if (!session || !session.user) {
+    // User is not logged in, redirect to login page or handle accordingly
+    return {
+      redirect: {
+        destination: '/api/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
+  // Extract roles from the user's session. This depends on how roles are stored.
+  // Assuming roles are included in the ID token as a custom claim:
+  const roles = session.user['https://the5cs.com/roles']; // Replace with your actual namespace
+
+  return { props: { user: session.user, roles } };
+}
