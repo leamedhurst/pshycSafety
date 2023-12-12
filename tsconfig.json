@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "app/lib/placeholder-data.js",
     "scripts/seed.js"
-  ],
-  "exclude": ["node_modules"]
+, "app/api/auth/[auth0]/route.js"  ],
+  "exclude": ["node_modules","api/**"]
 }

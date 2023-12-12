@@ -3,9 +3,34 @@ import { BuildingOfficeIcon, PhoneIcon, MapIcon, GlobeAltIcon } from '@heroicons
 import { Button } from '@/app/ui/button';
 import { createOrganization } from '@/app/lib/signup/signupactions';
 
-export default function OrganizationForm() {
-  return (
-    <form action={createOrganization(FormData)}>
+
+  interface FormData {  
+    id:string; 
+    name: string;
+    address: string;
+    contactName: string;
+    phone: string;
+    email: string;
+  }
+
+  export default function OrganizationForm() {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = {    
+        id:   form.orgName.value,
+        name: form.orgName.value,
+        address: form.address.value,
+        contactName: form.contactName.value,
+        phone: form.phone.value,
+        email: form.email.value,
+      };
+      await createOrganization(formData);
+      // Additional logic after the promise resolves
+    };
+  
+    return (
+      <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Organization Name */}
         <div className="mb-4">
@@ -14,7 +39,7 @@ export default function OrganizationForm() {
           </label>
           <input
             id="name"
-            name="name"
+            name="orgName"
             type="text"
             placeholder="Enter organization name"
             className="block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
